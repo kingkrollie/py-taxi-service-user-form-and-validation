@@ -8,7 +8,6 @@ from taxi.models import Driver, Car
 
 def validate_license_number(license_number):
     license_number = license_number.strip()
-
     first_three = license_number[:3]
     last_five = license_number[3:]
 
