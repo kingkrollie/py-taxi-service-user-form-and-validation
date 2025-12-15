@@ -6,32 +6,38 @@ from django.core.exceptions import ValidationError
 from taxi.models import Driver, Car
 
 
+def validate_license_number(license_number):
+    license_number = license_number.strip()
+
+    first_three = license_number[:3]
+    last_five = license_number[3:]
+
+    if len(license_number) != 8:
+        raise ValidationError("License number must be 8 characters long")
+    if not first_three.isalpha() or not first_three.isupper():
+        raise ValidationError(
+            "The first 3 characters must be uppercase letters"
+        )
+    if not last_five.isdigit():
+        raise ValidationError("The last 5 characters must be digits")
+
+
 class DriverLicenseUpdateForm(forms.ModelForm):
-    license_number = forms.CharField(max_length=8)
+    license_number = forms.CharField(
+        max_length=8,
+        validators=[validate_license_number],
+    )
 
-    class Meta(UserCreationForm.Meta):
-        model = Driver
+    class Meta:
+        model = get_user_model()
         fields = ("license_number",)
-
-    def clean_license_number(self):
-        license_number = self.cleaned_data.get("license_number", "").strip()
-
-        first_three = license_number[:3]
-        last_five = license_number[3:]
-
-        if len(license_number) != 8:
-            raise ValidationError("License number must be 8 characters long")
-        if not first_three.isalpha() or not first_three.isupper():
-            raise ValidationError("The first 3 characters "
-                                  "must be uppercase letters")
-        if not last_five.isdigit():
-            raise ValidationError("The last 5 characters must be digits")
-
-        return license_number
 
 
 class DriverCreateForm(UserCreationForm):
-    license_number = forms.CharField(max_length=8)
+    license_number = forms.CharField(
+        max_length=8,
+        validators=[validate_license_number],
+    )
 
     class Meta(UserCreationForm.Meta):
         model = Driver
@@ -40,31 +46,15 @@ class DriverCreateForm(UserCreationForm):
             "license_number",
             "first_name",
             "last_name",
-            "email"
+            "email",
         )
-
-    def clean_license_number(self):
-        license_number = self.cleaned_data.get("license_number", "").strip()
-
-        first_three = license_number[:3]
-        last_five = license_number[3:]
-
-        if len(license_number) != 8:
-            raise ValidationError("License number must be 8 characters long")
-        if not first_three.isalpha() or not first_three.isupper():
-            raise ValidationError("The first 3 characters "
-                                  "must be uppercase letters")
-        if not last_five.isdigit():
-            raise ValidationError("The last 5 characters must be digits")
-
-        return license_number
 
 
 class CarForm(forms.ModelForm):
     drivers = forms.ModelMultipleChoiceField(
         queryset=get_user_model().objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        required=False
+        required=False,
     )
 
     class Meta:
