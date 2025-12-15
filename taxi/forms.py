@@ -39,7 +39,7 @@ class DriverCreateForm(UserCreationForm):
     )
 
     class Meta(UserCreationForm.Meta):
-        model = Driver
+        model = get_user_model()
         fields = (
             "username",
             "license_number",
